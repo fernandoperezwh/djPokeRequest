@@ -1,5 +1,4 @@
-# Django Refugio de animales
-Practica del curso gratuito de Django de codigo facilito
+# Django Requests PokeApi 
 
 
 # Instalación
