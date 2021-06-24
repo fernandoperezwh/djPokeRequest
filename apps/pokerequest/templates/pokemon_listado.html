@@ -1,9 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'listado_base.html' %}
 
 {% block title %} Listado de Pokemon {% endblock %}
 
 {% block content %}
-    <h1>Listado de Pokemon</h1>
+    {% block section_title %}<h1>Listado de Pokemon</h1>{% endblock %}
+    
+    {% block pagination %}
     <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-end">
             <li class="page-item disabled">
@@ -17,20 +19,7 @@
             </li>
         </ul>
     </nav>
-    <div class="d-flex flex-row justify-content-around">
-        {% for pokemon in object_list %}
-            <div class="card" style="width: 18rem;">
-                <h5 class="card-title">{{ pokemon.name }}</h5>
-                <img src="{{pokemon.sprite_url}}"> 
-                <div class="card-body">
-                    <a href="/pr/pokemon/{{pokemon.name}}/detail/" class="btn btn-primary">
-                        Ver pokemon
-                    </a>
-                </div>
-            </div>
-        {% empty %}¡Ups!... Parece que no hay nada aqui{% endfor %}
-    </div>
-    
+    {% endblock  %}
 {% endblock  %}
 
 

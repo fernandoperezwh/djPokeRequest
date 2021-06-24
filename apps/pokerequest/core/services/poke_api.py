@@ -33,6 +33,7 @@ class PokeRequest(object):
     RESOURCE = {
         "pokemon": "pokemon",
         "species": "pokemon-species",
+        "type":    "type",
     }
 
     def __init__(self, resource, identifier=None, limit=10, offset=0):
@@ -174,6 +175,32 @@ class PokeRequestAsync(PokeRequest):
         if response != None:
             # Extraccion de urls individuales
             for pokemon in response.json().get("varieties", []):
+                pokemon_urls.append(pokemon["pokemon"]["url"])
+            # async request
+            rs = (grequests.get(u) for u in pokemon_urls)        
+            pokemon_list_res = grequests.map(rs)
+            for res in pokemon_list_res:
+                pokemon = res.json()
+                
+                name = pokemon.get("name", "")
+                sprites = pokemon.get("sprites", None)
+                url = None
+                if sprites: url = sprites.get("front_default", None)
+                
+                pokemon_response.append({ "name": name, "sprite_url": url })
+        return pokemon_response
+
+
+
+    def get_pokemon_by_type_with_picture_async(self):
+        # Valor de retorno
+        pokemon_response = []
+        # Consulta del listado de pokemones
+        response = super(PokeRequestAsync, self).get()
+        pokemon_urls = []
+        if response != None:
+            # Extraccion de urls individuales
+            for pokemon in response.json().get("pokemon", []):
                 pokemon_urls.append(pokemon["pokemon"]["url"])
             # async request
             rs = (grequests.get(u) for u in pokemon_urls)        

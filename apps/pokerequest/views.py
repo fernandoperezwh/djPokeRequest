@@ -11,7 +11,7 @@ def welcome(request):
 
 
 def pokemon_list(request):
-    pr = PokeRequestAsync(resource=PokeRequest.RESOURCE["pokemon"], limit=5, offset=0)
+    pr = PokeRequestAsync(resource=PokeRequest.RESOURCE["pokemon"], limit=12, offset=0)
     object_list = pr.get_pokemon_with_picture_async()
     return render(request, "pokemon_listado.html", {
         "object_list": object_list,
@@ -41,6 +41,7 @@ def pokemon_detail(request, identifier):
             "sprites":   sprite_list,
             "weight" :   obj["weight"],
             "height" :   obj["height"],
+            "types":     obj["types"],
             "species":   obj["species"]["name"],
             "abilities": ability_list,
             "moves":     move_list,
@@ -53,6 +54,16 @@ def pokemon_detail(request, identifier):
 def pokemon_species_list(request, identifier=None):
     pr = PokeRequestAsync(resource="species", identifier=identifier)
     object_list = pr.get_pokemon_by_varieties_with_picture_async()
-    return render(request, "pokemon_listado.html", {
+    return render(request, "pokemon_especie_listado.html", {
+        "specie_name": identifier,
+        "object_list": object_list,
+    })
+
+
+def pokemon_types_list(request, identifier=None):
+    pr = PokeRequestAsync(resource="type", identifier=identifier)
+    object_list = pr.get_pokemon_by_type_with_picture_async()
+    return render(request, "pokemon_tipo_listado.html", {
+        "type_name": identifier,
         "object_list": object_list,
     })
