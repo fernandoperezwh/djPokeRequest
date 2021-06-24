@@ -5,16 +5,26 @@ from apps.pokerequest.core.services.poke_api import PokeRequest, PokeRequestAsyn
 
 
 # Create your views here.
-def welcome(request):
-    return HttpResponse("welcome")
-
-
 
 def pokemon_list(request):
-    pr = PokeRequestAsync(resource=PokeRequest.RESOURCE["pokemon"], limit=12, offset=0)
+    page = int(request.GET.get("page", 1))
+
+    pr = PokeRequestAsync(resource=PokeRequest.RESOURCE["pokemon"], page=page, limit=10)
     object_list = pr.get_pokemon_with_picture_async()
+    
     return render(request, "pokemon_listado.html", {
         "object_list": object_list,
+        "pagination": {
+            "page": page,
+            "range": range(
+                page - 1 if page > 1 else page,
+                page + 2 if page > 1 else page + 3,
+            ),
+            "prev_page": page - 1 if page > 1 else page,
+            "has_prev_page": page > 1,
+            "has_next_page": True,
+            "next_page": page + 1,
+        }
     })
 
 

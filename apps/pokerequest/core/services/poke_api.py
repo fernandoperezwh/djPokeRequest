@@ -13,10 +13,6 @@ class PokeResourceNotAllowedError(Exception):
         self.value = value
     def __str__(self):
         return "PokeResourceNotAllowedError: {}".format(self.value)
-class PokePaginationError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
         return "PokePaginationError: {}".format(self.value)
 #endregion
 
@@ -36,11 +32,11 @@ class PokeRequest(object):
         "type":    "type",
     }
 
-    def __init__(self, resource, identifier=None, limit=10, offset=0):
+    def __init__(self, resource, identifier=None, page=None, limit=None):
         self.resource = resource  # Resource name
         self.identifier = identifier # identifier for the resources (id or name)
+        self.page = page
         self.limit = limit # Pagination limit
-        self.offset = offset # Pagination offset
 
         self.count = None
         self.next_page = None
@@ -53,7 +49,6 @@ class PokeRequest(object):
             + ", resource='{}'"
             + ", identifier='{}'"
             + ", limit={}"
-            + ", offset={}"
             + ", count={}"
             + ", next_page={}"
             + ", prev_page={}"
@@ -63,12 +58,20 @@ class PokeRequest(object):
             self.resource,
             self.identifier,
             self.limit,
-            self.offset,
             self.count,
             self.next_page,
             self.prev_page,
         )
 
+
+
+    def build_pagination_params(self):
+        params = {}
+        if self.page and isinstance(self.page, int):
+            params["limit"] = self.limit or 10
+            params["offset"] = (self.page - 1) * self.limit
+        return params
+        
 
     
     
@@ -76,7 +79,7 @@ class PokeRequest(object):
         """
         Construye la url para consultar la api segun los atributos de la clase
         """
-        request_url, params = self.HOST, {}
+        request_url, params = self.HOST, self.build_pagination_params()
         try:
             # resource
             if self.resource:
@@ -85,28 +88,21 @@ class PokeRequest(object):
                 else: raise PokeResourceNotAllowedError("resource: '{}' is not allowed".format(self.resource))
             else: raise PokeResourceEmptyError("'resource' is required")
             # identifier if it exist
-            if self.identifier:
+            if self.identifier: 
                 request_url += "{}/".format(self.identifier)
-            # pagination
-            if self.limit != None or self.offset != None:
-                if self.limit >= 1 and self.offset >= 0:
-                    params["limit"] = self.limit
-                    params["offset"] = self.offset
-                else: raise PokePaginationError("['limit' >= 1] and ['offset'>=0] are required in pagination.")
         except (PokeResourceEmptyError, PokeResourceNotAllowedError) as ex:
             raise
-        except PokePaginationError as ex:
-            print ex
         except Exception as ex:
             print ex
         return request_url, params
         
 
     def update_meta_pagination(self, response):
-        res = response.json()
-        self.count = res["count"]
-        self.next_page = res["next"]
-        self.prev_page = res["previous"]
+        if response != None:
+            res = response.json()
+            self.count = res["count"]
+            self.next_page = res["next"]
+            self.prev_page = res["previous"]
 
 
     def _get(self, url, params={}):
