@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %} {% endblock %}
+
+{% block main_content %}
+    {% block section_title %} {% endblock %}
+
+    {% block pagination %} {% endblock %}
+
+    <div class="container">
+        <div class="row">
+            {% for pokemon in object_list %}
+            <div class="col">
+                <div class="card" style="width: 18rem; margin: 15px;">
+                    <img src="{{pokemon.sprite_url}}"> 
+                    <div class="card-body">
+                        <h5 class="card-title">{{ pokemon.name }}</h5>
+                        <a href="/pr/pokemon/{{pokemon.name}}/detail/" class="btn btn-primary">
+                            Ver pokemon
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}¡Ups!... Parece que no hay nada aqui{% endfor %}
+        </div>
+    </div>
+{% endblock  %}
+
+
+

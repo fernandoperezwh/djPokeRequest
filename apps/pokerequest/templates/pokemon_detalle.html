@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %} {{object.name}} {% endblock %}
+
+{% block main_content %}
+    <div class="pk-header">
+        <h1>Pokemon Name: "{{object.name}}"</h1>
+    </div>
+
+    <div class="pk-body">
+        <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for sprite in object.sprites %}
+                <div class="carousel-item {% if forloop.first%} active {% endif %}">
+                    <img src="{{sprite}}" style="width: 18rem;"> 
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label"><strong>WEIGHT:</strong></label>
+            <div class="col-sm-10"><input readonly class="form-control-plaintext" value="{{object.weight}} hectograms"></div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label"><strong>HEIGHT:</strong></label>
+            <div class="col-sm-10"><input readonly class="form-control-plaintext" value="{{object.height}} decimetres"></div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label"><strong>TYPES:</strong></label>
+            <div class="col-sm-10">
+                {% for ele in object.types %}
+                    <a href="/pr/pokemon-type/{{ ele.type.name }}/list/" class="form-control-plaintext">{{ ele.type.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label"><strong>SPECIE:</strong></label>
+            <div class="col-sm-10">
+                <a href="/pr/pokemon-species/{{ object.species }}/list/" class="form-control-plaintext">{{object.species}}</a>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label"><strong>ABILITIES:</strong></label>
+            <div class="col-sm-10"><textarea readonly style="height: 50px" class="form-control-plaintext">{{object.abilities}}</textarea></div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label"><strong>MOVES:</strong></label>
+            <div class="col-sm-10"><textarea readonly style="height: 200px" class="form-control-plaintext">{{object.moves}}</textarea></div>
+        </div>
+    </div>
+
+{% endblock  %}
+
+
+

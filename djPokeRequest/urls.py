@@ -13,8 +13,16 @@ Including another URLconf
     1. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import include, url
-from django.contrib import admin
+from django.views.static import serve 
+
+# local imports
+from apps.pokerequest.views import pokemon_list
+from djPokeRequest import settings
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^$', pokemon_list),
+    url(r'^pr/', include('apps.pokerequest.urls')),
+]
+urlpatterns += [
+    url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}), 
 ]

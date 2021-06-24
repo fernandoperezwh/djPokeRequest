@@ -1,0 +1,26 @@
+{% extends 'listado_base.html' %}
+
+{% block title %} Listado de Pokemon {% endblock %}
+
+{% block content %}
+    {% block section_title %}<h1>Listado de Pokemon</h1>{% endblock %}
+    
+    {% if pagination%}{% block pagination %}
+    <nav>
+        <ul class="pagination justify-content-end">
+            <li class="page-item {% if not pagination.has_prev_page %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ pagination.prev_page }}" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            {% for index in pagination.range %}
+                <li class="page-item {% if index == pagination.page %}active{% endif %}"><a class="page-link" href="?page={{index}}">{{index}}</a></li>
+            {% endfor %}
+            <li class="page-item {% if not pagination.has_next_page %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ pagination.next_page }}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    {% endblock %}{% endif %}
+{% endblock  %}
+
+
+
