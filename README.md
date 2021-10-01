@@ -12,3 +12,5 @@
 - Realizar las migraciones con: ```python manage.py migrate```
 <!-- - Crear super user con: ```python manage.py createsuperuser``` -->
 - Ejecutar la aplicación con: ```python manage.py runserver```
+
+# Test
