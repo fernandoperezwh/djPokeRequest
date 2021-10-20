@@ -10,6 +10,10 @@ on:
         description: 'location'
         required: false
         default: 'The Octoverse'
+      
+      inputTest:
+        description: 'Este es un input de prueba'
+        required: True
 
 jobs:
   say_hello:
