@@ -118,3 +118,13 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR:   'alert-danger',
 }
+
+# Configuracion de conexion para la api de djRefugioAnimales
+DJREFUGIOANIMALES = {
+    # Host del servidor donde se expone la api
+    'host': 'http://127.0.0.1',
+    # Puerto del servidor donde se expone la api
+    'port': 8000,
+    # Define si la consulta se consultara sobre la api publica o privada del proyecto djRefugioAnimales
+    'is_public_api': False,
+}

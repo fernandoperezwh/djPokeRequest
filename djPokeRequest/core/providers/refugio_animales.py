@@ -1,24 +1,27 @@
 # coding=utf-8
-# thrid party imports
+# django packages
+from django.conf import settings
+# thrid party packages
 import requests
-
+# local packages
 from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, DjRefugioAnimalesServerError, \
     DjRefugioAnimalesForbiddenError, DjRefugioAnimalesRefreshTokenError
+
 
 CONNECTION_ERROR = (
     requests.ConnectTimeout,
     requests.ConnectionError,
 )
 
-class RefugioAnimales:
-    host = 'http://127.0.0.1'
-    port = 8000
 
-    def __init__(self, access_token=None, refresh_token=None, is_public_api=False):
+class RefugioAnimales:
+    is_public_api = settings.DJREFUGIOANIMALES.get('is_public_api')
+    host = settings.DJREFUGIOANIMALES.get('host')
+    port = settings.DJREFUGIOANIMALES.get('port')
+
+    def __init__(self, access_token=None, refresh_token=None):
         self.access_token = access_token
         self.refresh_token = refresh_token
-        # NOTE: Bandera unicamente para pruebas y consumir la api publica
-        self.is_public_api = is_public_api
 
     @property
     def base_endpoint(self):
@@ -47,9 +50,10 @@ class RefugioAnimales:
 
     @property
     def headers(self):
-        api_headers = {
-            'Authorization': 'Bearer {access_token}'.format(access_token=self.access_token),
-        }
+        api_headers = {}
+        # Se agrega el header de 'Authorization' si la consulta se realiza sobre la api privada
+        if not self.is_public_api:
+            api_headers['Authorization'] = 'Bearer {access_token}'.format(access_token=self.access_token)
         return api_headers
 
     def verify_access_token(self, refresh=False):
