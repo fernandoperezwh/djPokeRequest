@@ -9,7 +9,7 @@ from apps.refugio_animales.forms import DjRefugioAnimalesLoginForm, DjRefugioAni
 from djPokeRequest.core.decorators.check_access_token import verify_access_token
 from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, \
     DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesNotFoundError, DjRefugioAnimalesForbiddenError, \
-    DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesBadRequestError
+    DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesBadRequestError, DjRefugioAnimalesRefreshTokenError
 from djPokeRequest.core.providers import RefugioAnimales
 from djPokeRequest.core.utils import render_with_cookie_setter, generic_api_delete
 
@@ -31,7 +31,8 @@ def login(request):
             context={'form': form, 'success_login': True},
             cookies={'access_token': access_token, 'refresh_token': refresh_token}
         )
-    except (DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesForbiddenError):
+    except (DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesForbiddenError,
+            DjRefugioAnimalesRefreshTokenError):
         # No se pudo realizar el login con los tokens de la cookie
         pass
 

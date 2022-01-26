@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 # local packages
-from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesForbiddenError
+from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesForbiddenError, \
+    DjRefugioAnimalesRefreshTokenError
 from djPokeRequest.core.providers import RefugioAnimales
 
 
@@ -42,7 +43,7 @@ def verify_access_token(view_func):
                 'access_token': access_token,
                 'refresh_token': refresh_token,
             }
-        except DjRefugioAnimalesForbiddenError:
+        except (DjRefugioAnimalesForbiddenError, DjRefugioAnimalesRefreshTokenError):
             messages.warning(request, MESSAGE_ERROR)
             return HttpResponseRedirect(REDIRECT_URL)
 
