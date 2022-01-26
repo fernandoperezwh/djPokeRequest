@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %} Listado de Mascotas {% endblock %}
+
+{% block main_content %}
+    <h1>Listado de Mascotas</h1>
+
+    <div class="container">
+        <div class="row">
+            {% for pet in object_list %}
+            <div class="col">
+                <div class="card" style="width: 18rem; margin: 15px;">
+                    <img src="{{ root_img }}{{ pet.foto }}" alt="Te presentamos a '{{ pet.nombre }}'">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ pet.nombre }}</h5>
+                        <p class="card-text">
+                            "{{ pet.nombre }}" es una mascota del sexo {{ pet.sexo }} que tiene una edad de
+                            {{ pet.edad }} años.
+                        </p>
+                        <p class="card-text">
+                            Su dueño(a) {{ pet.persona.nombre }} {{ pet.persona.apellidos }} lo(a) rescato el día
+                            {{ pet.fecha_rescate }}.
+                        </p>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Vacunas aplicadas:
+                        {% for vacuna in pet.vacunas %} {{ vacuna.nombre }} - {% empty %} Ninguna {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}¡Ups!... Parece que no hay nada aqui{% endfor %}
+        </div>
+    </div>
+{% endblock  %}
+
+
+
