@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.pokerequest',
+    'apps.refugio_animales'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -59,6 +60,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'djPokeRequest/templates'),
             os.path.join(BASE_DIR, 'apps.pokerequest/templates'),
+            os.path.join(BASE_DIR, 'apps.refugio_animales/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -115,4 +117,14 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'alert-success',
     messages.WARNING: 'alert-warning',
     messages.ERROR:   'alert-danger',
+}
+
+# Configuracion de conexion para la api de djRefugioAnimales
+DJREFUGIOANIMALES = {
+    # Host del servidor donde se expone la api
+    'host': 'http://127.0.0.1',
+    # Puerto del servidor donde se expone la api
+    'port': 8000,
+    # Define si la consulta se consultara sobre la api publica o privada del proyecto djRefugioAnimales
+    'is_public_api': False,
 }

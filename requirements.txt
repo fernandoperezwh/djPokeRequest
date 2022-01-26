@@ -1,12 +1,11 @@
 certifi==2021.5.30
 chardet==4.0.0
-Django==1.8.19
+Django==1.11.29
 gevent==21.1.2
 greenlet==1.1.0
 grequests==0.6.0
 idna==2.10
 Pillow==6.2.2
-pkg-resources==0.0.0
 requests==2.25.1
 urllib3==1.26.5
 zope.event==4.5.0

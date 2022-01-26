@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %} Eliminar {{ object.nombre }} {% endblock %}
+
+{% block main_content %}
+    <h1>Eliminar registro de: {{ object.nombre }}</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Eliminar</button>
+        <a class="btn btn-default" href="{{ redirect }}">Cancelar</a>
+    </form>
+{% endblock main_content %}
+

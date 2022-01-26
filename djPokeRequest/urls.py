@@ -22,6 +22,7 @@ from djPokeRequest import settings
 urlpatterns = [
     url(r'^$', pokemon_list),
     url(r'^pr/', include('apps.pokerequest.urls')),
+    url(r'^ra/', include('apps.refugio_animales.urls')),
 ]
 urlpatterns += [
     url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}), 

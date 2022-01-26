@@ -14,3 +14,8 @@
 - Ejecutar la aplicación con: ```python manage.py runserver```
 
 # Test
+N/A
+
+# Changelog
+ - v0.2.0 Pruebas con DRF haciendo consultar a la api de djRefugioAnimales
+ - v0.1.0 Curso de Capacitación para realizar request a la api de Pokemon
