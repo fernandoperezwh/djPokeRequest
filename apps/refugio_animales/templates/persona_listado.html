@@ -29,7 +29,7 @@
                     <td>{{ data.email }}</td>
                     <td>{{ data.domicilio }}</td>
                     <td><a href="#{{data.id }}" class="btn btn-secondary">Editar</a></td>
-                    <td><a href="#{{data.id }}" class="btn btn-danger">Borrar</a></td>
+                    <td><a href="{% url 'owners_delete' data.id %}" class="btn btn-danger">Borrar</a></td>
                 </tr>
             {% endfor %}
             </tbody>

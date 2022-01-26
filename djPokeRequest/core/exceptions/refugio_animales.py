@@ -1,6 +1,11 @@
-class DjRefugioAnimalesServerError(Exception):
+class DjRefugioAnimalesServerUnknowError(Exception):
     def __str__(self):
-        return "DjRefugioAnimalesServerError: Un error ha ocurrido intentando conectar con el servidor"
+        return "DjRefugioAnimalesServerConnectionError: Ha ocurrido un error desconocido"
+
+
+class DjRefugioAnimalesServerConnectionError(Exception):
+    def __str__(self):
+        return "DjRefugioAnimalesServerConnectionError: Un error ha ocurrido intentando conectar con el servidor"
 
 
 class DjRefugioAnimalesAuthError(Exception):
@@ -16,3 +21,8 @@ class DjRefugioAnimalesRefreshTokenError(Exception):
 class DjRefugioAnimalesForbiddenError(Exception):
     def __str__(self):
         return "DjRefugioAnimalesAuthError: No cuentas con el permiso para acceder al recurso"
+
+
+class DjRefugioAnimalesNotFoundError(Exception):
+    def __str__(self):
+        return "DjRefugioAnimalesAuthError: No se encontro el recurso"

@@ -19,7 +19,7 @@
                 <tr>
                     <td>{{ data.nombre }}</td>
                     <td><a href="#{{ data.id }}" class="btn btn-secondary">Editar</a></td>
-                    <td><a href="#{{ data.id }}" class="btn btn-danger">Borrar</a></td>
+                    <td><a href="{% url 'vaccines_delete' data.id %}" class="btn btn-danger">Borrar</a></td>
                 </tr>
             {% endfor %}
             </tbody>

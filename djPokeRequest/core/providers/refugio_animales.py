@@ -4,9 +4,9 @@ from django.conf import settings
 # thrid party packages
 import requests
 # local packages
-from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, DjRefugioAnimalesServerError, \
-    DjRefugioAnimalesForbiddenError, DjRefugioAnimalesRefreshTokenError
-
+from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, \
+    DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesForbiddenError, DjRefugioAnimalesRefreshTokenError, \
+    DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesNotFoundError
 
 CONNECTION_ERROR = (
     requests.ConnectTimeout,
@@ -56,6 +56,42 @@ class RefugioAnimales:
             api_headers['Authorization'] = 'Bearer {access_token}'.format(access_token=self.access_token)
         return api_headers
 
+    def __get_resource(self, endpoint):
+        """
+        Funcion generica que consulta algun recurso.
+        Si un error ocurre esta funcion generica maneja los errores
+        :param endpoint: Endpoint del recurso
+        :return:
+        """
+        try:
+            response = requests.get(endpoint, headers=self.headers)
+            if response.status_code == 404:
+                raise DjRefugioAnimalesNotFoundError
+            if response.status_code == 401:
+                raise DjRefugioAnimalesForbiddenError
+            return response.json()
+        except CONNECTION_ERROR:
+            raise DjRefugioAnimalesServerConnectionError
+
+    def __delete_resource(self, endpoint):
+        """
+        Funcion generica que elimina un recurso en especifico.
+        Si un error ocurre esta funcion generica maneja los errores
+        :param endpoint: Endpoint del recurso
+        :return:
+        """
+        try:
+            response = requests.delete(endpoint, headers=self.headers)
+            if response.status_code == 401:
+                raise DjRefugioAnimalesForbiddenError
+            # verifica algun error desconocido
+            if response.status_code != 204:
+                raise DjRefugioAnimalesServerUnknowError
+            # En este punto pudo eliminar correctamente el registro
+            return
+        except CONNECTION_ERROR:
+            raise DjRefugioAnimalesServerConnectionError
+
     def verify_access_token(self, refresh=False):
         """
         Verifica el estado del access_token consultando a la API. Si el token no es valido se levantara un raise del
@@ -66,11 +102,13 @@ class RefugioAnimales:
         :param refresh: Indica si consulta el servicio para hacer refresh del access_token y obtener uno valido
         :return: Regresa una tupla donde el primer elemento corresponde al access_token y el segundo al refresh_token
         """
-        ENDPOINT = "{endpoint}/verify".format(endpoint=self.auth_endpoint)
+        ENDPOINT = "{endpoint}/verify/".format(endpoint=self.auth_endpoint)
         if not self.access_token:
             raise DjRefugioAnimalesForbiddenError
         try:
-            response = requests.get(ENDPOINT)
+            response = requests.post(ENDPOINT, data={
+                'token': self.access_token
+            })
             # Comprueba el status code de la respuesta para validar si el access_token es incorrecto
             if response.status_code == 401:
                 # Si no esta habilitado el refresh_token entonces levantamos directamente la excepcion
@@ -80,7 +118,7 @@ class RefugioAnimales:
                 self.refresh_access_token()
             return self.access_token, self.refresh_token
         except CONNECTION_ERROR:
-            raise DjRefugioAnimalesServerError
+            raise DjRefugioAnimalesServerConnectionError
 
     def refresh_access_token(self):
         """
@@ -104,9 +142,9 @@ class RefugioAnimales:
             response_data = response.json()
             self.access_token = response_data.get('access')
             self.refresh_token = response_data.get('refresh')
-            return self.access_token, self.refresh_tokens
+            return self.access_token, self.refresh_token
         except CONNECTION_ERROR:
-            raise DjRefugioAnimalesServerError
+            raise DjRefugioAnimalesServerConnectionError
 
     def login(self, username, password):
         """
@@ -131,7 +169,16 @@ class RefugioAnimales:
             self.refresh_token = response_data.get('refresh')
             return self.access_token, self.refresh_token
         except CONNECTION_ERROR:
-            raise DjRefugioAnimalesServerError
+            raise DjRefugioAnimalesServerConnectionError
+
+    def get_pet(self, pk):
+        """
+        Obtiene el registro de una mascota mediante su pk consultando la API de djRefugioAnimales
+        :param pk: Id del registro de mascota a eliminar
+        :return:
+        """
+        ENDPOINT = "{endpoint}/mascota/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
+        return self.__get_resource(ENDPOINT)
 
     def get_pets(self):
         """
@@ -139,13 +186,23 @@ class RefugioAnimales:
         :return:
         """
         ENDPOINT = "{endpoint}/mascota/".format(endpoint=self.api_endpoint)
-        try:
-            response = requests.get(ENDPOINT, headers=self.headers)
-            if response.status_code == 401:
-                raise DjRefugioAnimalesForbiddenError
-            return response.json()
-        except CONNECTION_ERROR:
-            raise DjRefugioAnimalesServerError
+        return self.__get_resource(ENDPOINT)
+
+    def delete_pet(self, pk):
+        """
+        Elimina un registro de la mascota por su id consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/mascota/{pk}".format(endpoint=self.api_endpoint, pk=pk)
+        self.__delete_resource(ENDPOINT)
+
+    def get_vaccine(self, pk):
+        """
+        Obtiene el registro de una mascota mediante su pk consultando la API de djRefugioAnimales
+        :param pk: Id del registro de mascota a eliminar
+        :return:
+        """
+        ENDPOINT = "{endpoint}/vacuna/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
+        return self.__get_resource(ENDPOINT)
 
     def get_vaccines(self):
         """
@@ -153,24 +210,35 @@ class RefugioAnimales:
         :return:
         """
         ENDPOINT = "{endpoint}/vacuna/".format(endpoint=self.api_endpoint)
-        try:
-            response = requests.get(ENDPOINT, headers=self.headers)
-            if response.status_code == 401:
-                raise DjRefugioAnimalesForbiddenError
-            return response.json()
-        except CONNECTION_ERROR:
-            raise DjRefugioAnimalesServerError
+        return self.__get_resource(ENDPOINT)
 
-    def get_owner(self):
+    def delete_vaccine(self, pk):
         """
-        Obtiene la lista de dueños de mascotas consultando la API de djRefugioAnimales
+        Elimina un registro de vacuna por su id consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/vacuna/{pk}".format(endpoint=self.api_endpoint, pk=pk)
+        self.__delete_resource(ENDPOINT)
+
+    def get_owner(self, pk):
+        """
+        Obtiene el registro de un dueño/dueña mediante su pk consultando la API de djRefugioAnimales
+        :param pk: Id del registro de mascota a eliminar
+        :return:
+        """
+        ENDPOINT = "{endpoint}/persona/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
+        return self.__get_resource(ENDPOINT)
+
+    def get_owners(self):
+        """
+        Obtiene la lista de dueños/dueñas de mascotas consultando la API de djRefugioAnimales
         :return:
         """
         ENDPOINT = "{endpoint}/persona/".format(endpoint=self.api_endpoint)
-        try:
-            response = requests.get(ENDPOINT, headers=self.headers)
-            if response.status_code == 401:
-                raise DjRefugioAnimalesForbiddenError
-            return response.json()
-        except CONNECTION_ERROR:
-            raise DjRefugioAnimalesServerError
+        return self.__get_resource(ENDPOINT)
+
+    def delete_owner(self, pk):
+        """
+        Elimina un registro del dueño/dueña de la mascota por su id consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/persona/{pk}".format(endpoint=self.api_endpoint, pk=pk)
+        self.__delete_resource(ENDPOINT)
