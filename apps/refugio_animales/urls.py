@@ -8,6 +8,8 @@ urlpatterns = [
     url(r'^djRefugioAnimales/login/$', views.login, name='login_djrefugioanimales_api'),
     # region CRUD mascotas
     url(r'^pets/list/$', views.pets_list, name='pets_list'),
+    url(r'^pets/new/$', views.pets_form, name='pets_new'),
+    url(r'^pets/edit/(\d+)/$', views.pets_form, name='pets_edit'),
     url(r'^pets/delete/(\d+)/$', views.pets_delete, name='pets_delete'),
     # endregion
     # region CRUD dueños/dueñas de mascotas

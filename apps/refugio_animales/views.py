@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 # local packages
 from apps.refugio_animales.forms import DjRefugioAnimalesLoginForm, DjRefugioAnimalesVacunaForm, \
-    DjRefugioAnimalesPersonaForm
+    DjRefugioAnimalesPersonaForm, DjRefugioAnimalesMascotaForm
 from djPokeRequest.core.decorators.check_access_token import verify_access_token
 from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, \
     DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesNotFoundError, DjRefugioAnimalesForbiddenError, \
@@ -81,6 +81,85 @@ def pets_list(request, *args, **kwargs):
         template_path='mascota_listado.html',
         context={'object_list': response, 'root_img': api.base_endpoint},
         cookies=kwargs.get('api_tokens', {}) if kwargs else {}
+    )
+
+
+@verify_access_token
+def pets_form(request, pk=None, *args, **kwargs):
+    RETURN_URL = 'pets_list'
+    initial = {}
+
+    api = RefugioAnimales(**kwargs.get('api_tokens', {}))
+    # Se verifica la existencia y se intenta obtener el registro a modificar
+    if pk:
+        try:
+            initial = api.get_pet(pk)
+        except DjRefugioAnimalesNotFoundError:
+            messages.warning(request, 'No se encontró la mascota con el id #{pk}'.format(pk=pk))
+            return HttpResponseRedirect(reverse(RETURN_URL))
+        except DjRefugioAnimalesServerConnectionError:
+            messages.warning(request, 'Un error ha ocurrido esperando la respuesta del servidor'.format(pk=pk))
+            return HttpResponseRedirect(reverse(RETURN_URL))
+
+    # Se consulta la lista de personas y vacunas para llenar el formulario
+    try:
+        list_vaccines = api.get_vaccines()
+        list_owners = api.get_owners()
+    except DjRefugioAnimalesServerConnectionError:
+        messages.warning(request, 'Un error ha ocurrido esperando la respuesta del servidor'.format(pk=pk))
+        return HttpResponseRedirect(reverse(RETURN_URL))
+    # Se parsea la lista de vacunas y dueños para obtener los choices de los inputs del formulario
+    choices_owners = []
+    for ele in list_owners:
+        choices_owners.append([
+            ele.get('id'),
+            '{first_name} {last_name}'.format(
+                first_name=ele.get('nombre'),
+                last_name=ele.get('apellidos')
+            )
+        ])
+    choices_vaccines = []
+    for ele in list_vaccines:
+        choices_vaccines.append([ele.get('id'), ele.get('nombre')])
+    kwargs_form = {
+        'choices_owners': choices_owners,
+        'choices_vaccines': choices_vaccines,
+    }
+    form = DjRefugioAnimalesMascotaForm(**kwargs_form)
+
+    # Si hay valores iniciales los parseamos y establecemos unicamente los ids
+    if initial:
+        initial['persona'] = initial.get('persona').get('id')
+        initial['vacunas'] = list(map(lambda ele: ele.get('id'), initial.get('vacunas')))
+        form = DjRefugioAnimalesMascotaForm(initial=initial, **kwargs_form)
+
+    # Update/create
+    if request.method == "POST":
+        form = DjRefugioAnimalesMascotaForm(request.POST, initial=initial, **kwargs_form)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+            try:
+                if initial:
+                    api.edit_pet(pk, cleaned_data)
+                else:
+                    api.create_pet(cleaned_data)
+            except DjRefugioAnimalesBadRequestError:
+                messages.error(request, 'Por favor verifique los datos del formulario')
+            except DjRefugioAnimalesForbiddenError:
+                messages.warning(request, 'No cuenta con el permiso para acceder a este recurso')
+                return HttpResponseRedirect(reverse('login_djrefugioanimales_api'))
+            except (DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesServerConnectionError):
+                messages.warning(request, 'Un error ha ocurrido con el servidor.')
+                return HttpResponseRedirect(reverse(RETURN_URL))
+            messages.success(request, 'Se ha realizado con exito la accion sobre la mascota <strong>{name}</strong>'
+                                      ''.format(name=form.cleaned_data.get('nombre')))
+            return HttpResponseRedirect(reverse(RETURN_URL))
+
+    return render_with_cookie_setter(
+        request,
+        template_path="mascota_form.html",
+        context={"form": form},
+        cookies=kwargs.get('api_tokens') if kwargs else {}
     )
 
 

@@ -6,6 +6,12 @@
     <h1>Listado de Mascotas</h1>
 
     <div class="container">
+        <div>
+            <a href="{% url 'pets_new' %}">
+                <button type="button" class="btn btn-success"> Registrar nueva mascota</button>
+            </a>
+        </div>
+
         <div class="row">
             {% for pet in object_list %}
             <div class="col">
@@ -25,6 +31,12 @@
                     <div class="card-footer text-muted">
                         Vacunas aplicadas:
                         {% for vacuna in pet.vacunas %} {{ vacuna.nombre }} - {% empty %} Ninguna {% endfor %}
+                    </div>
+                    <div class="card-body">
+                        <div class="content text-center">
+                            <a href="{% url 'pets_edit' pet.id %}" class="col-5 btn btn-secondary">Editar</a>
+                            <a href="{% url 'pets_delete' pet.id %}" class="col-5 btn btn-danger">Borrar</a>
+                        </div>
                     </div>
                 </div>
             </div>

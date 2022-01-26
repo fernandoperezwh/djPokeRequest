@@ -1,3 +1,4 @@
+# coding=utf-8
 # django packages
 from django.conf import settings
 from django.contrib import messages
@@ -5,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 # local packages
 from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesForbiddenError, \
-    DjRefugioAnimalesRefreshTokenError
+    DjRefugioAnimalesRefreshTokenError, DjRefugioAnimalesServerConnectionError
 from djPokeRequest.core.providers import RefugioAnimales
 
 
@@ -45,6 +46,9 @@ def verify_access_token(view_func):
             }
         except (DjRefugioAnimalesForbiddenError, DjRefugioAnimalesRefreshTokenError):
             messages.warning(request, MESSAGE_ERROR)
+            return HttpResponseRedirect(REDIRECT_URL)
+        except DjRefugioAnimalesServerConnectionError:
+            messages.error(request, 'No ha sido posible establecer conexión con el servidor.')
             return HttpResponseRedirect(REDIRECT_URL)
 
         # El access token esta presente en la peticion y no presenta ningun error
