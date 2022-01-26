@@ -6,34 +6,42 @@
     <h1>Listado de dueños/dueñas de mascotas</h1>
 
     <div class="container">
+        <div>
+            <a href="{% url 'owners_new' %}">
+                <button type="button" class="btn btn-success"> Registrar nuevo dueño/dueña</button>
+            </a>
+        </div>
+
         <div class="row">
-        <div style="margin-top: 25px;">
-        <table>
-            <thead>
-                <tr>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Apellidos</th>
-                    <th scope="col">Edad</th>
-                    <th scope="col">Telefono</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Domicilio</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for data in object_list %}
-                <tr>
-                    <td>{{ data.nombre }}</td>
-                    <td>{{ data.apellidos }}</td>
-                    <td>{{ data.edad }} años</td>
-                    <td>{{ data.telefono }}</td>
-                    <td>{{ data.email }}</td>
-                    <td>{{ data.domicilio }}</td>
-                    <td><a href="#{{data.id }}" class="btn btn-secondary">Editar</a></td>
-                    <td><a href="{% url 'owners_delete' data.id %}" class="btn btn-danger">Borrar</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+            <div style="margin-top: 25px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Apellidos</th>
+                            <th scope="col">Edad</th>
+                            <th scope="col">Telefono</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Domicilio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for data in object_list %}
+                        <tr>
+                            <td>{{ data.nombre }}</td>
+                            <td>{{ data.apellidos }}</td>
+                            <td>{{ data.edad }} años</td>
+                            <td>{{ data.telefono }}</td>
+                            <td>{{ data.email }}</td>
+                            <td>{{ data.domicilio }}</td>
+                            <td><a href="{% url 'owners_edit'  data.id %}" class="btn btn-secondary">Editar</a></td>
+                            <td><a href="{% url 'owners_delete' data.id %}" class="btn btn-danger">Borrar</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock  %}
 

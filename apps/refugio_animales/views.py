@@ -4,10 +4,12 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 # local packages
-from apps.refugio_animales.forms import DjRefugioAnimalesLoginForm
+from apps.refugio_animales.forms import DjRefugioAnimalesLoginForm, DjRefugioAnimalesVacunaForm, \
+    DjRefugioAnimalesPersonaForm
 from djPokeRequest.core.decorators.check_access_token import verify_access_token
 from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, \
-    DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesNotFoundError, DjRefugioAnimalesForbiddenError
+    DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesNotFoundError, DjRefugioAnimalesForbiddenError, \
+    DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesBadRequestError
 from djPokeRequest.core.providers import RefugioAnimales
 from djPokeRequest.core.utils import render_with_cookie_setter, generic_api_delete
 
@@ -125,6 +127,52 @@ def owners_list(request, *args, **kwargs):
 
 
 @verify_access_token
+def owners_form(request, pk=None, *args, **kwargs):
+    RETURN_URL = 'owners_list'
+    initial = {}
+
+    api = RefugioAnimales(**kwargs.get('api_tokens', {}))
+    # Se verifica la existencia y se intenta obtener el registro a modificar
+    if pk:
+        try:
+            initial = api.get_owner(pk)
+        except DjRefugioAnimalesNotFoundError:
+            messages.warning(request, 'No se encontro el/la dueño/dueña con el id #{pk}'.format(pk=pk))
+            return HttpResponseRedirect(reverse(RETURN_URL))
+
+    form = DjRefugioAnimalesPersonaForm(initial=initial) if initial else DjRefugioAnimalesPersonaForm()
+
+    # Update/create
+    if request.method == "POST":
+        form = DjRefugioAnimalesPersonaForm(request.POST, initial=initial)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+            try:
+                if initial:
+                    api.edit_owner(pk, cleaned_data)
+                else:
+                    api.create_owner(cleaned_data)
+            except DjRefugioAnimalesBadRequestError:
+                messages.error(request, 'Por favor verifique los datos del formulario')
+            except DjRefugioAnimalesForbiddenError:
+                messages.warning(request, 'No cuenta con el permiso para acceder a este recurso')
+                return HttpResponseRedirect(reverse('login_djrefugioanimales_api'))
+            except (DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesServerConnectionError):
+                messages.warning(request, 'Un error ha ocurrido con el servidor.')
+                return HttpResponseRedirect(reverse(RETURN_URL))
+            messages.success(request, 'Se ha realizado con exito la accion sobre la vacuna <strong>{name}</strong>'
+                                      ''.format(name=form.cleaned_data.get('nombre')))
+            return HttpResponseRedirect(reverse(RETURN_URL))
+
+    return render_with_cookie_setter(
+        request,
+        template_path="persona_form.html",
+        context={"form": form},
+        cookies=kwargs.get('api_tokens') if kwargs else {}
+    )
+
+
+@verify_access_token
 def owners_delete(request, pk, *args, **kwargs):
     RETURN_URL = 'owners_list'
     api = RefugioAnimales(**kwargs.get('api_tokens', {}))
@@ -163,6 +211,52 @@ def vaccines_list(request, *args, **kwargs):
         request,
         template_path='vacuna_listado.html',
         context={'object_list': response},
+        cookies=kwargs.get('api_tokens') if kwargs else {}
+    )
+
+
+@verify_access_token
+def vaccines_form(request, pk=None, *args, **kwargs):
+    RETURN_URL = 'vaccines_list'
+    initial = {}
+
+    api = RefugioAnimales(**kwargs.get('api_tokens', {}))
+    # Se verifica la existencia y se intenta obtener el registro a modificar
+    if pk:
+        try:
+            initial = api.get_vaccine(pk)
+        except DjRefugioAnimalesNotFoundError:
+            messages.warning(request, 'No se encontro la vacuna con el id #{pk}'.format(pk=pk))
+            return HttpResponseRedirect(reverse(RETURN_URL))
+
+    form = DjRefugioAnimalesVacunaForm(initial=initial) if initial else DjRefugioAnimalesVacunaForm()
+
+    # Update/create
+    if request.method == "POST":
+        form = DjRefugioAnimalesVacunaForm(request.POST, initial=initial)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+            try:
+                if initial:
+                    api.edit_vaccine(pk, cleaned_data)
+                else:
+                    api.create_vaccine(cleaned_data)
+            except DjRefugioAnimalesBadRequestError:
+                messages.error(request, 'Por favor verifique los datos del formulario')
+            except DjRefugioAnimalesForbiddenError:
+                messages.warning(request, 'No cuenta con el permiso para acceder a este recurso')
+                return HttpResponseRedirect(reverse('login_djrefugioanimales_api'))
+            except (DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesServerConnectionError):
+                messages.warning(request, 'Un error ha ocurrido con el servidor.')
+                return HttpResponseRedirect(reverse(RETURN_URL))
+            messages.success(request, 'Se ha realizado con exito la accion sobre la vacuna <strong>{name}</strong>'
+                                      ''.format(name=form.cleaned_data.get('nombre')))
+            return HttpResponseRedirect(reverse(RETURN_URL))
+
+    return render_with_cookie_setter(
+        request,
+        template_path="vacuna_form.html",
+        context={"form": form},
         cookies=kwargs.get('api_tokens') if kwargs else {}
     )
 

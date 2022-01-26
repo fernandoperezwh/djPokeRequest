@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %} Formulario de Vacuna {% endblock %}
+
+{% block main_content %}
+    <h1>Formulario de Vacuna</h1>
+
+    <form method="post">{% csrf_token %}
+        <div class="mb-3 row">
+            <label for="nombre" class="col-sm-2 col-form-label">Nombre</label>
+            <div class="col-sm-10">
+                {{ form.nombre }}
+                <div id="nombre_errors" class="form-text">{{ form.nombre.errors }}</div>
+            </div>
+        </div>
+        <button class="btn btn-outline-primary" type="submit">Continuar</button>
+    </form>
+{% endblock main_content %}
+

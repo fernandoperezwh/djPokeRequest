@@ -6,24 +6,32 @@
     <h1>Listado de vacunas</h1>
 
     <div class="container">
+        <div>
+            <a href="{% url 'vaccines_new' %}">
+                <button type="button" class="btn btn-success"> Registrar nueva Vacuna</button>
+            </a>
+        </div>
+
         <div class="row">
-        <div style="margin-top: 25px;">
-        <table>
-            <thead>
-            <tr>
-                <th scope="col">Nombre</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for data in object_list %}
-                <tr>
-                    <td>{{ data.nombre }}</td>
-                    <td><a href="#{{ data.id }}" class="btn btn-secondary">Editar</a></td>
-                    <td><a href="{% url 'vaccines_delete' data.id %}" class="btn btn-danger">Borrar</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+            <div style="margin-top: 25px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for data in object_list %}
+                        <tr>
+                            <td>{{ data.nombre }}</td>
+                            <td><a href="{% url 'vaccines_edit'  data.id %}" class="btn btn-secondary">Editar</a></td>
+                            <td><a href="{% url 'vaccines_delete' data.id %}" class="btn btn-danger">Borrar</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock  %}
 

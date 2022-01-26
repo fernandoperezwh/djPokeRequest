@@ -6,7 +6,7 @@ import requests
 # local packages
 from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, \
     DjRefugioAnimalesServerConnectionError, DjRefugioAnimalesForbiddenError, DjRefugioAnimalesRefreshTokenError, \
-    DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesNotFoundError
+    DjRefugioAnimalesServerUnknowError, DjRefugioAnimalesNotFoundError, DjRefugioAnimalesBadRequestError
 
 CONNECTION_ERROR = (
     requests.ConnectTimeout,
@@ -73,6 +73,58 @@ class RefugioAnimales:
         except CONNECTION_ERROR:
             raise DjRefugioAnimalesServerConnectionError
 
+    def __create_resource(self, endpoint, payload):
+        """
+        Funcion generica que crea nuevo registro en un recurso especifico.
+        Si un error ocurre esta funcion generica maneja los errores
+        :param endpoint: Endpoint del recurso
+        :param payload: Campos del formulario para crear este nuevo registro
+        :return:
+        """
+        try:
+            response = requests.post(endpoint, data=payload, headers=self.headers)
+            # Error por body incorrecto del request
+            if response.status_code == 400:
+                raise DjRefugioAnimalesBadRequestError
+            # Error en permisos
+            if response.status_code == 401:
+                raise DjRefugioAnimalesForbiddenError
+            # verifica algun error desconocido
+            if response.status_code != 201:
+                raise DjRefugioAnimalesServerUnknowError
+            # En este punto pudo editar correctamente el registro
+            return
+        except CONNECTION_ERROR:
+            raise DjRefugioAnimalesServerConnectionError
+
+    def __edit_resource(self, endpoint, payload):
+        """
+        Funcion generica que edita un registro de un recurso especifico.
+        Si un error ocurre esta funcion generica maneja los errores
+        :param endpoint: Endpoint del recurso
+        :param payload: Campos del formulario para crear este nuevo registro
+        :return:
+        """
+        try:
+            response = requests.put(endpoint, data=payload, headers=self.headers)
+            # Error por body incorrecto del request
+            if response.status_code == 400:
+                # NOTE: Podria especificarse los campos para dar información al cliene
+                raise DjRefugioAnimalesBadRequestError
+            # Error en permisos
+            if response.status_code == 401:
+                raise DjRefugioAnimalesForbiddenError
+            # Elemento no encontrado
+            if response.status_code == 404:
+                raise DjRefugioAnimalesNotFoundError
+            # verifica algun error desconocido
+            if response.status_code != 200:
+                raise DjRefugioAnimalesServerUnknowError
+            # En este punto pudo editar correctamente el registro
+            return
+        except CONNECTION_ERROR:
+            raise DjRefugioAnimalesServerConnectionError
+
     def __delete_resource(self, endpoint):
         """
         Funcion generica que elimina un recurso en especifico.
@@ -84,6 +136,8 @@ class RefugioAnimales:
             response = requests.delete(endpoint, headers=self.headers)
             if response.status_code == 401:
                 raise DjRefugioAnimalesForbiddenError
+            if response.status_code == 404:
+                raise DjRefugioAnimalesNotFoundError
             # verifica algun error desconocido
             if response.status_code != 204:
                 raise DjRefugioAnimalesServerUnknowError
@@ -188,11 +242,25 @@ class RefugioAnimales:
         ENDPOINT = "{endpoint}/mascota/".format(endpoint=self.api_endpoint)
         return self.__get_resource(ENDPOINT)
 
+    def create_pet(self, payload):
+        """
+        Crea un nuevo registro de la mascota consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/mascota/".format(endpoint=self.api_endpoint)
+        self.__create_resource(ENDPOINT, payload)
+
+    def edit_pet(self, pk, payload):
+        """
+        Edita un registro de la mascota por su id consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/mascota/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
+        self.__edit_resource(ENDPOINT, payload)
+
     def delete_pet(self, pk):
         """
         Elimina un registro de la mascota por su id consultando la API de djRefugioAnimales
         """
-        ENDPOINT = "{endpoint}/mascota/{pk}".format(endpoint=self.api_endpoint, pk=pk)
+        ENDPOINT = "{endpoint}/mascota/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
         self.__delete_resource(ENDPOINT)
 
     def get_vaccine(self, pk):
@@ -212,11 +280,25 @@ class RefugioAnimales:
         ENDPOINT = "{endpoint}/vacuna/".format(endpoint=self.api_endpoint)
         return self.__get_resource(ENDPOINT)
 
+    def create_vaccine(self, payload):
+        """
+        Crea un nuevo registro de vacuna consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/vacuna/".format(endpoint=self.api_endpoint)
+        self.__create_resource(ENDPOINT, payload)
+
+    def edit_vaccine(self, pk, payload):
+        """
+        Edita un registro de vacuna por su id consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/vacuna/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
+        self.__edit_resource(ENDPOINT, payload)
+
     def delete_vaccine(self, pk):
         """
         Elimina un registro de vacuna por su id consultando la API de djRefugioAnimales
         """
-        ENDPOINT = "{endpoint}/vacuna/{pk}".format(endpoint=self.api_endpoint, pk=pk)
+        ENDPOINT = "{endpoint}/vacuna/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
         self.__delete_resource(ENDPOINT)
 
     def get_owner(self, pk):
@@ -236,9 +318,23 @@ class RefugioAnimales:
         ENDPOINT = "{endpoint}/persona/".format(endpoint=self.api_endpoint)
         return self.__get_resource(ENDPOINT)
 
+    def create_owner(self, payload):
+        """
+        Crea un nuevo registro del dueño/dueña de mascota consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/persona/".format(endpoint=self.api_endpoint)
+        self.__create_resource(ENDPOINT, payload)
+
+    def edit_owner(self, pk, payload):
+        """
+        Edita un registro del dueño/dueña de mascota por su id consultando la API de djRefugioAnimales
+        """
+        ENDPOINT = "{endpoint}/persona/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
+        self.__edit_resource(ENDPOINT, payload)
+
     def delete_owner(self, pk):
         """
         Elimina un registro del dueño/dueña de la mascota por su id consultando la API de djRefugioAnimales
         """
-        ENDPOINT = "{endpoint}/persona/{pk}".format(endpoint=self.api_endpoint, pk=pk)
+        ENDPOINT = "{endpoint}/persona/{pk}/".format(endpoint=self.api_endpoint, pk=pk)
         self.__delete_resource(ENDPOINT)

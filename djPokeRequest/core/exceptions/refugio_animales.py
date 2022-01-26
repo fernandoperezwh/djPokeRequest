@@ -1,3 +1,4 @@
+# coding=utf-8
 class DjRefugioAnimalesServerUnknowError(Exception):
     def __str__(self):
         return "DjRefugioAnimalesServerConnectionError: Ha ocurrido un error desconocido"
@@ -26,3 +27,8 @@ class DjRefugioAnimalesForbiddenError(Exception):
 class DjRefugioAnimalesNotFoundError(Exception):
     def __str__(self):
         return "DjRefugioAnimalesAuthError: No se encontro el recurso"
+
+
+class DjRefugioAnimalesBadRequestError(Exception):
+    def __str__(self):
+        return "DjRefugioAnimalesAuthError: Verifique los datos de su petición, hay campos incorrectos"
