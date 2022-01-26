@@ -1,15 +1,10 @@
 # coding=utf-8
 # django packages
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
 # local packages
-from django.urls import reverse
-
 from apps.refugio_animales.forms import DjRefugioAnimalesLoginForm
 from djPokeRequest.core.decorators.check_access_token import verify_access_token
-from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, DjRefugioAnimalesServerError, \
-    DjRefugioAnimalesForbiddenError
+from djPokeRequest.core.exceptions.refugio_animales import DjRefugioAnimalesAuthError, DjRefugioAnimalesServerError
 from djPokeRequest.core.providers import RefugioAnimales
 from djPokeRequest.core.utils import render_with_cookie_setter
 
@@ -46,18 +41,11 @@ def login(request):
     )
 
 
-
+@verify_access_token
 def pets_list(request, *args, **kwargs):
-    # Se obtiene las cookies a traves del request o el decorador
-    access_token = kwargs.get('cookies') if kwargs else request.COOKIES
-    refresh_token = kwargs.get('cookies') if kwargs else request.COOKIES
-    # XXX: Error cuando no tiene permiso
-    api = RefugioAnimales(access_token=access_token.get('access_token'),
-                          refresh_token=refresh_token.get('refresh_token'))
+    api = RefugioAnimales(**kwargs.get('api_tokens', {}))
     try:
         response = api.get_pets()
-    except DjRefugioAnimalesForbiddenError:
-        return HttpResponseRedirect(reverse('login_djrefugioanimales_api'))
     except DjRefugioAnimalesServerError:
         # se define una lista vacia y se regresa el mensaje de que el servidor tuvo un porblmea
         response = []
@@ -67,6 +55,41 @@ def pets_list(request, *args, **kwargs):
         request,
         template_path='mascota_listado.html',
         context={'object_list': response, 'root_img': api.base_endpoint},
-        cookies=kwargs.get('cookies') if kwargs else {}
+        cookies=kwargs.get('api_tokens', {}) if kwargs else {}
     )
 
+
+@verify_access_token
+def owner_list(request, *args, **kwargs):
+    api = RefugioAnimales(**kwargs.get('api_tokens', {}))
+    try:
+        response = api.get_owner()
+    except DjRefugioAnimalesServerError:
+        # se define una lista vacia y se regresa el mensaje de que el servidor tuvo un porblmea
+        response = []
+        messages.error(request, "Un error ha ocurrido intentando conectar con el servidor")
+
+    return render_with_cookie_setter(
+        request,
+        template_path='persona_listado.html',
+        context={'object_list': response},
+        cookies=kwargs.get('api_tokens') if kwargs else {}
+    )
+
+
+@verify_access_token
+def vaccines_list(request, *args, **kwargs):
+    api = RefugioAnimales(**kwargs.get('api_tokens', {}))
+    try:
+        response = api.get_vaccines()
+    except DjRefugioAnimalesServerError:
+        # se define una lista vacia y se regresa el mensaje de que el servidor tuvo un porblmea
+        response = []
+        messages.error(request, "Un error ha ocurrido intentando conectar con el servidor")
+
+    return render_with_cookie_setter(
+        request,
+        template_path='vacuna_listado.html',
+        context={'object_list': response},
+        cookies=kwargs.get('api_tokens') if kwargs else {}
+    )

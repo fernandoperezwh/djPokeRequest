@@ -29,7 +29,7 @@ def verify_access_token(view_func):
 
         # Se valida que el access token se encuentre presente en las cookies del request
         if not request.COOKIES.get('access_token'):
-            messages.error(request, MESSAGE_ERROR)
+            messages.warning(request, MESSAGE_ERROR)
             return HttpResponseRedirect(REDIRECT_URL)
 
         # Se valida que el token sea correcto haciendo una peticion a la API
@@ -37,10 +37,13 @@ def verify_access_token(view_func):
                               refresh_token=request.COOKIES.get('refresh_token'))
         try:
             access_token, refresh_token = api.verify_access_token(refresh=True)
-            # Pasamos a las views los tokens para setearlos en la cookie por si se tuvieron que hacer refresh
-            kwargs['cookies'] = {'access_token': access_token, 'refresh_token': refresh_token}
+            # Pasamos en la view la instancia actualizada del cliente RefugioAnimales
+            kwargs['api_tokens'] = {
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+            }
         except DjRefugioAnimalesForbiddenError:
-            messages.error(request, MESSAGE_ERROR)
+            messages.warning(request, MESSAGE_ERROR)
             return HttpResponseRedirect(REDIRECT_URL)
 
         # El access token esta presente en la peticion y no presenta ningun error

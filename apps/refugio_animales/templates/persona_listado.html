@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %} Listado de dueños/dueñas de mascotas {% endblock %}
+
+{% block main_content %}
+    <h1>Listado de dueños/dueñas de mascotas</h1>
+
+    <div class="container">
+        <div class="row">
+        <div style="margin-top: 25px;">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Apellidos</th>
+                    <th scope="col">Edad</th>
+                    <th scope="col">Telefono</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Domicilio</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for data in object_list %}
+                <tr>
+                    <td>{{ data.nombre }}</td>
+                    <td>{{ data.apellidos }}</td>
+                    <td>{{ data.edad }} años</td>
+                    <td>{{ data.telefono }}</td>
+                    <td>{{ data.email }}</td>
+                    <td>{{ data.domicilio }}</td>
+                    <td><a href="#{{data.id }}" class="btn btn-secondary">Editar</a></td>
+                    <td><a href="#{{data.id }}" class="btn btn-danger">Borrar</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock  %}
+
+
+
+

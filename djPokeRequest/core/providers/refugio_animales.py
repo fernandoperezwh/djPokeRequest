@@ -46,7 +46,7 @@ class RefugioAnimales:
         """
         Endpoint base para autentificación de API djRefugioAnimales
         """
-        return "{endpoint}/api/auth/".format(endpoint=self.base_endpoint)
+        return "{endpoint}/api/auth".format(endpoint=self.base_endpoint)
 
     @property
     def headers(self):
@@ -116,7 +116,7 @@ class RefugioAnimales:
         :param password: Password perteneciente a usuario admin de django
         :return: Regresa una tupla donde el primer elemento corresponde al access_token y el segundo al refresh_token
         """
-        ENDPOINT = self.auth_endpoint
+        ENDPOINT = "{endpoint}/".format(endpoint=self.auth_endpoint)
         try:
             response = requests.post(ENDPOINT, data={
                 'username': username,
@@ -141,10 +141,36 @@ class RefugioAnimales:
         ENDPOINT = "{endpoint}/mascota/".format(endpoint=self.api_endpoint)
         try:
             response = requests.get(ENDPOINT, headers=self.headers)
-            # Verifica el error en el permiso
             if response.status_code == 401:
                 raise DjRefugioAnimalesForbiddenError
-            # Se obtuvieron con exito la lista de mascotas
+            return response.json()
+        except CONNECTION_ERROR:
+            raise DjRefugioAnimalesServerError
+
+    def get_vaccines(self):
+        """
+        Obtiene la lista de vacunas consultando la API de djRefugioAnimales
+        :return:
+        """
+        ENDPOINT = "{endpoint}/vacuna/".format(endpoint=self.api_endpoint)
+        try:
+            response = requests.get(ENDPOINT, headers=self.headers)
+            if response.status_code == 401:
+                raise DjRefugioAnimalesForbiddenError
+            return response.json()
+        except CONNECTION_ERROR:
+            raise DjRefugioAnimalesServerError
+
+    def get_owner(self):
+        """
+        Obtiene la lista de dueños de mascotas consultando la API de djRefugioAnimales
+        :return:
+        """
+        ENDPOINT = "{endpoint}/persona/".format(endpoint=self.api_endpoint)
+        try:
+            response = requests.get(ENDPOINT, headers=self.headers)
+            if response.status_code == 401:
+                raise DjRefugioAnimalesForbiddenError
             return response.json()
         except CONNECTION_ERROR:
             raise DjRefugioAnimalesServerError
